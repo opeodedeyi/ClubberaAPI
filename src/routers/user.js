@@ -28,9 +28,9 @@ const router = new express.Router();
  */
 router.get('', async (req, res) => {
     try {
-        res.status(201).send({"message": "Welcome to community api"})
+        res.status(201).send({"message": "Welcome to Clubbera API"})
     } catch (e) {
-        res.status(400).send({ "message": "Email failed to verify" })
+        res.status(400).send({ "message": "Something went wrong entering Clubbera API" })
     }
 })
 
