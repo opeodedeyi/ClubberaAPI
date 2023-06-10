@@ -52,31 +52,6 @@ const userSchema = new mongoose.Schema({
         required: true,
         minlength: 8,
         trim: true,
-        validate(value) {
-            if (value.toLowerCase().includes('password')) {
-                throw new Error('Password cannot contain "password"');
-            }
-    
-            // At least one uppercase letter
-            if (!/[A-Z]/.test(value)) {
-                throw new Error('Password must contain at least one uppercase letter');
-            }
-    
-            // At least one lowercase letter
-            if (!/[a-z]/.test(value)) {
-                throw new Error('Password must contain at least one lowercase letter');
-            }
-    
-            // At least one digit
-            if (!/\d/.test(value)) {
-                throw new Error('Password must contain at least one digit');
-            }
-    
-            // At least one special character
-            if (!/[!@#$%^&*(),.?":{}|<>]/.test(value)) {
-                throw new Error('Password must contain at least one special character');
-            }
-        },
         select: false // Exclude the password field when querying users
     },    
     gender: {
