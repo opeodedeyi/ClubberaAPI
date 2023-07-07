@@ -89,12 +89,13 @@ router.post('/signup', async (req, res) => {
     try {
         const newUser = await userService.createUser(req.body);
         // Send a confirmation email using the emailService
-        emailService.sendConfirmationEmail(newUser);
+        const emailOptions = emailService.generateConfirmationEmail(newUser);
         // Generate an authentication token using authService
         const token = await authService.generateAuthToken(newUser);
+        emailService.sendEmail(emailOptions.to, emailOptions.subject, emailOptions.text);
         res.status(201).send({ newUser, token, message: 'User created' });
     } catch (e) {
-        res.status(401).send({ message: 'Something went wrong' });
+        res.status(401).send({ message: e.message });
     }
 });
 
@@ -139,34 +140,6 @@ router.post('/google-auth', async (req, res) => {
 
 
 /**
- * Request a new verification email (for logged-out users)
- * @route POST /request-verification-email
- * @param {Object} req.body - The request body containing the user's email address
- * @returns {Object} 200 - A success status and a success message
- * @returns {Object} 404 - A not found status and an error message
- * @returns {Object} 500 - An internal server error status and an error message
- */
-router.post('/request-verification-email', async (req, res) => {
-    try {
-        const user = await userService.getUserByEmail(req.body.email);
-
-        if (!user) {
-            return res.status(404).send({ message: 'User not found' });
-        }
-
-        if (user.isEmailConfirmed) {
-            return res.status(200).send({ message: 'Email is already confirmed' });
-        }
-        
-        emailService.sendConfirmationEmail(user);
-        res.status(200).send({ message: 'Verification email sent' });
-    } catch (e) {
-        res.status(500).send({ message: 'Something went wrong' });
-    }
-});
-
-
-/**
  * Request a new verification email (for logged-in users)
  * @route POST /request-verification-email-logged-in
  * @middleware auth - The authentication middleware
@@ -175,7 +148,7 @@ router.post('/request-verification-email', async (req, res) => {
  * @returns {Object} 401 - An unauthorized status and an error message
  * @returns {Object} 500 - An internal server error status and an error message
  */
-router.post('/request-verification-email-logged-in', auth, async (req, res) => {
+router.post('/request-verification-email', auth, async (req, res) => {
     try {
         const user = req.user;
 

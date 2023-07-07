@@ -52,6 +52,22 @@ const groupSchema = new mongoose.Schema({
         required: false,
     },
     location: {
+        place_id: {
+            type: String,
+            required: false,
+        },
+        formatted_address: {
+            type: String,
+            required: false,
+        },
+        name: {
+            type: String,
+            required: false,
+        },
+        types: {
+            type: [String],
+            required: false,
+        },
         geo: {
             type: {
                 type: String,
@@ -62,14 +78,6 @@ const groupSchema = new mongoose.Schema({
                 type: [Number],
                 required: false,
             },
-        },
-        address: {
-            type: String,
-            required: false,
-        },
-        zip: {
-            type: String,
-            required: false,
         },
     },    
     category: {
