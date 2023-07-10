@@ -109,8 +109,11 @@ router.post('/signup', async (req, res) => {
  */
 router.post('/google-auth', async (req, res) => {
     try {
+        // Get Google token
+        const idToken = await getGoogleIdToken(req.body.code)
         // Verify the Google token
-        const payload = await verifyGoogleToken(req.body.idToken);
+        const payload = await verifyGoogleToken(idToken);
+        console.log(payload);
         // Extract user information from the payload
         const { email, given_name, family_name, picture } = payload;
         // Check if the user already exists in the database
@@ -427,15 +430,30 @@ router.get('/users/:id', async (req, res) => {
 
 // Initialize Google OAuth2 client
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const client = new OAuth2Client(CLIENT_ID);
+const oAuth2Client = new OAuth2Client(
+    CLIENT_ID,
+    CLIENT_SECRET,
+    'postmessage',
+);
+
+// Define an async function to verify the Google token
+const getGoogleIdToken = async (code) => {
+    const { tokens } = await oAuth2Client.getToken(code); // exchange code for tokens
+    console.log(tokens.id_token);
+    return tokens.id_token;
+};
 
 // Define an async function to verify the Google token
 const verifyGoogleToken = async (idToken) => {
-  const ticket = await client.verifyIdToken({
-    idToken,
-    audience: CLIENT_ID,
-  });
-  return ticket.getPayload();
+    console.log(`id token = ${idToken}`);
+    const ticket = await client.verifyIdToken({
+        idToken,
+        audience: CLIENT_ID,
+    });
+    console.log(`ticket = ${ticket}`);
+    return ticket.getPayload();
 };
 
 
