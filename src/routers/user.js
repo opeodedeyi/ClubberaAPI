@@ -2,6 +2,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 
 // Import module
 const User = require('../models/user');
@@ -115,29 +116,31 @@ router.post('/google-auth', async (req, res) => {
         const payload = await verifyGoogleToken(idToken);
         console.log(payload);
         // Extract user information from the payload
-        const { email, given_name, family_name, picture } = payload;
+        const { email, name, picture } = payload;
         // Check if the user already exists in the database
         let user = await userService.getUserByEmail(email);
 
         if (!user) {
             const newUser = {
                 email,
-                    fullName: `${given_name} ${family_name}`,
-                    password: bcrypt.hashSync(process.env.GOOGLE_USER_DEFAULT_PASSWORD, 8),
-                    profilePhoto: {
-                        photoKey: '',
-                        photoURL: picture,
-                    },
-                    isEmailConfirmed: true,
+                fullname: name,
+                password: bcrypt.hashSync(generatePassword(16), 8),
+                profilePhoto: {
+                    key: '',
+                    location: picture,
+                },
+                isEmailConfirmed: true,
             };
 
             user = await userService.createUser(newUser);
         }
 
+        console.log(user);
+
         const token = await authService.generateAuthToken(user);
         res.status(200).send({ user, token, message: 'User logged in with Google' });
     } catch (e) {
-        res.status(401).send({ message: 'Something went wrong with Google authentication' });
+        res.status(500).send({ message: 'Something went wrong with Google authentication' });
     }
 });
 
@@ -441,20 +444,21 @@ const oAuth2Client = new OAuth2Client(
 // Define an async function to verify the Google token
 const getGoogleIdToken = async (code) => {
     const { tokens } = await oAuth2Client.getToken(code); // exchange code for tokens
-    console.log(tokens.id_token);
     return tokens.id_token;
 };
 
 // Define an async function to verify the Google token
 const verifyGoogleToken = async (idToken) => {
-    console.log(`id token = ${idToken}`);
     const ticket = await client.verifyIdToken({
         idToken,
         audience: CLIENT_ID,
     });
-    console.log(`ticket = ${ticket}`);
     return ticket.getPayload();
 };
+
+function generatePassword(length) {
+    return crypto.randomBytes(length).toString('hex');
+}
 
 
 // Export the router
