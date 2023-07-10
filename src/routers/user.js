@@ -143,7 +143,7 @@ router.post('/google-auth', async (req, res) => {
 
 
 /**
- * Request a new verification email (for logged-in users)
+ * Request a new verification email (for logged-in users) (Tested)
  * @route POST /request-verification-email-logged-in
  * @middleware auth - The authentication middleware
  * @returns {Object} 200 - A success status and a success message
