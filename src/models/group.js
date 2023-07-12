@@ -81,9 +81,8 @@ const groupSchema = new mongoose.Schema({
         },
     },    
     category: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: 'Category',
+        type: [String],
+        required: true
     },
     moderators: [
         {
@@ -128,7 +127,15 @@ const groupSchema = new mongoose.Schema({
 
 
 // Add a 2dsphere index for the location.geo field
-groupSchema.index({ 'location.geo': '2dsphere' });
+groupSchema.index({
+    name: 'text',
+    'location.formatted_address': 'text',
+    'description': 'text',
+    'categories': 'text',
+});
+
+// Add a 2dsphere index for the location.geo field
+groupSchema.index({ 'location.geo.coordinates': '2dsphere' });
 
 // Create the Group model using the group schema
 const Group = mongoose.model('Group', groupSchema);

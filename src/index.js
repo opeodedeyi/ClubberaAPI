@@ -8,6 +8,7 @@ const userRouter = require('./routers/user')
 const categoryRouter = require('./routers/category');
 const groupRouter = require('./routers/group')
 const commentRouter = require('./routers/comment')
+const searchRouter = require('./routers/search')
 
 const port = process.env.PORT || 4000
 
@@ -17,6 +18,7 @@ app.use(userRouter)
 app.use(categoryRouter);
 app.use(groupRouter);
 app.use(commentRouter);
+app.use(searchRouter);
 
 app.listen(port, () => {
     console.log(`Server is up on port ${port}`);

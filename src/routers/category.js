@@ -14,7 +14,7 @@ const router = new express.Router();
  * @param {Object} res - Express response object.
  * @returns {Object} The created category or an error message if an error occurs.
  */
-router.post('/category', auth, adminUser, async (req, res) => {
+router.post('/category', auth, async (req, res) => {
     try {
         const category = new Category({
             ...req.body,
@@ -69,8 +69,9 @@ router.delete('/category/:id', auth, adminUser, async (req, res) => {
  */
 router.get('/category', async (req, res) => {
     try {
-        const categories = await Category.find({});
-        res.status(200).send(categories);
+        const categories = await Category.find({}, 'name').sort('name'); // Here we are only selecting the 'name' field
+        const categoryNames = categories.map(category => category.name); // Converting the returned categories to an array of names
+        res.status(200).send(categoryNames);
     } catch (e) {
         res.status(500).send({ error: 'Server error' });
     }
