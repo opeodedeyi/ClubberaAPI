@@ -41,12 +41,6 @@ const groupSchema = new mongoose.Schema({
         maxlength: 500,
         trim: true,
     },
-    rules: {
-        type: String,
-        required: false,
-        maxlength: 500,
-        trim: true,
-    },
     bannerURL: {
         type: String,
         required: false,
@@ -75,8 +69,8 @@ const groupSchema = new mongoose.Schema({
                 required: false,
             },
             coordinates: {
-                type: [Number],
-                required: false,
+                lat: { type: Number, required: false },
+                lng: { type: Number, required: false }
             },
         },
     },    
