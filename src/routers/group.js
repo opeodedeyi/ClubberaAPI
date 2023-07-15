@@ -40,6 +40,28 @@ router.post('/group', auth, isEmailConfirmed, async (req, res) => {
  * @desc Edit a group's details
  * @access Private (Owner or Moderator)
  *
+ * @param {string} req.params.id - The ID of the group to be updated
+ *
+ */
+router.get('/group/:id', async (req, res) => {
+    try {
+        const group = await Group.findById(req.params.id);
+        if (!group) {
+            return res.status(404).json({ error: 'Group not found' });
+        }
+        
+        res.status(200).send(group);
+    } catch (err) {
+      res.status(500).json({ error: 'Server error' });
+    }
+});
+
+
+/**
+ * @route PATCH /group/:id/edit
+ * @desc Edit a group's details
+ * @access Private (Owner or Moderator)
+ *
  * @param {Object} req.body - The request body containing the updates
  * @param {string} req.params.id - The ID of the group to be updated
  *
