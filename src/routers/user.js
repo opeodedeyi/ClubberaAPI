@@ -102,6 +102,27 @@ router.post('/signup', async (req, res) => {
 
 
 /**
+ * Update existing users URL
+ * @route POST /update-all-url
+ * @returns {Object} 201 - A success status and a success message
+ * @returns {Object} 401 - An unauthorized status and an error message
+ */
+router.post('/update-all-url', async (req, res) => {
+    // Use the userService to create a new user
+    try {
+        const users = await User.find({ uniqueURL: { $exists: false } });
+        users.forEach(async (user) => {
+            user.uniqueURL = user.fullname.replace(/\s+/g, '-').toLowerCase() + '-' + Date.now();
+            await user.save();
+        });
+        res.status(201).send({ users, message: 'User URL updated' });
+    } catch (e) {
+        res.status(401).send({ message: e.message });
+    }
+});
+
+
+/**
  * Authenticate a user with Google
  * @route POST /google-auth
  * @param {Object} req.body - The request body containing the Google ID token
@@ -407,17 +428,17 @@ router.post('/me/profile-photo', auth, express.json({ limit: '10mb' }), async (r
 
 
 /**
- * Get the details of a specific user by their ID (Tested)
- * @route GET /users/:id
+ * Get the details of a specific user by their uniqueURL (Tested)
+ * @route GET /users/:uniqueURL
  * @middleware auth - The authentication middleware
- * @param {string} req.params.id - The ID of the user to retrieve
+ * @param {string} req.params.uniqueURL - The uniqueURL of the user to retrieve
  * @returns {Object} 200 - A success status and the user object
  * @returns {Object} 404 - A not found status and an error message
  * @returns {Object} 500 - An internal server error status and an error message
  */
-router.get('/users/:id', async (req, res) => {
+router.get('/users/:uniqueURL', async (req, res) => {
     try {
-        const user = await userService.findUserById(req.params.id);
+        const user = await userService.findUserByUniqueURL(req.params.uniqueURL);
         
         if (!user) {
             return res.status(404).send({ message: 'User not found' });

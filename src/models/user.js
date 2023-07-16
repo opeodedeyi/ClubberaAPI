@@ -47,6 +47,11 @@ const userSchema = new mongoose.Schema({
         },
         index: true,
     },
+    uniqueURL: {
+        type: String,
+        required: true,
+        unique: true
+    },
     password: {
         type: String,
         required: true,
@@ -146,6 +151,21 @@ userSchema.methods.toJSON = function () {
 
     return userObject
 }
+
+
+/**
+ * Middleware to generate uniqueURL for the user
+ */
+userSchema.pre('save', function (next) {
+    if (!this.isModified('fullname')) {
+        return next();
+    }
+
+    // Generate the unique URL (slug)
+    this.uniqueURL = this.fullname.replace(/\s+/g, '-').toLowerCase() + '-' + Date.now();
+
+    next();
+});
 
 
 /**

@@ -32,6 +32,16 @@ async function findUserById(userId) {
 
 
 /**
+ * Find a user by uniqueURL.
+ * @param {string} uniqueURL - The user uniqueURL to search for.
+ * @returns {Promise<User|null>} - The user found or null if not found.
+ */
+async function findUserByUniqueURL(uniqueURL) {
+    return User.findOne({ uniqueURL: uniqueURL });
+}
+
+
+/**
  * Find a user by email and password.
  * 
  * @param {String} email - The email of the user.
@@ -142,6 +152,7 @@ const setProfilePhoto = async (user, s3Data) => {
 module.exports = {
     createUser,
     findUserById,
+    findUserByUniqueURL,
     findByCredentials,
     getUserByEmail,
     updateUser,
