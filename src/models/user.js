@@ -67,10 +67,7 @@ const userSchema = new mongoose.Schema({
         set: (value) => value.toLowerCase(), // Convert the input to lowercase
     },
     interests: {
-        type: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Category'
-        }],
+        type: [String],
         default: [],
         required: false
     },
