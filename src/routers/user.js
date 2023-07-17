@@ -102,6 +102,39 @@ router.post('/signup', async (req, res) => {
 
 
 /**
+ * Edit/Update a User details
+ * @route PATCH /users/me/edit-profile
+ * @param {Object} req.body - The user data
+ * @returns {Object} 201 - A success status, the new user object, the token, and a success message
+ * @returns {Object} 400 - An unauthorized status and an error message
+ */
+router.patch('/users/me/edit-profile', auth, async (req, res) => {
+    const updates = Object.keys(req.body);
+    const allowedUpdates = ['fullname', 'bio', 'gender', 'interests', 'profilePhoto'];
+    const isValidOperation = updates.every((update) => allowedUpdates.includes(update));
+    
+    if (!isValidOperation) {
+        return res.status(400).send({ error: 'Invalid updates!' });
+    }
+    
+    try {
+        const user = req.user;
+
+        if (!user) {
+            return res.status(404).send();
+        }
+
+        updates.forEach((update) => user[update] = req.body[update]);
+        await user.save();
+
+        res.send(user);
+    } catch (e) {
+        res.status(400).send(e);
+    }
+});
+
+
+/**
  * Update existing users URL
  * @route POST /update-all-url
  * @returns {Object} 201 - A success status and a success message
