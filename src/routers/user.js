@@ -168,7 +168,6 @@ router.post('/google-auth', async (req, res) => {
         const idToken = await getGoogleIdToken(req.body.code)
         // Verify the Google token
         const payload = await verifyGoogleToken(idToken);
-        console.log(payload);
         // Extract user information from the payload
         const { email, name, picture } = payload;
         // Check if the user already exists in the database

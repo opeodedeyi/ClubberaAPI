@@ -49,7 +49,7 @@ const userSchema = new mongoose.Schema({
     },
     uniqueURL: {
         type: String,
-        required: true,
+        required: false,
         unique: true
     },
     bio: {
