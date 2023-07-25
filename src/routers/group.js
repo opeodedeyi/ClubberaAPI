@@ -36,6 +36,30 @@ router.post('/group', auth, isEmailConfirmed, async (req, res) => {
 
 
 /**
+ * Update existing groups URL
+ * @route POST /update-all-groups-url
+ * @returns {Object} 201 - A success status and a success message
+ * @returns {Object} 401 - An unauthorized status and an error message
+ */
+router.post('/update-all-groups-url', async (req, res) => {
+    try {
+        const groups = await Group.find({ uniqueURL: { $exists: false } });
+
+        for (const group of groups) {
+            if (group.name) {
+                group.uniqueURL = group.name.replace(/\s+/g, '-').toLowerCase() + '-' + Date.now();
+                await group.save();
+            }
+        }
+
+        res.status(201).send({ groups, message: 'Groups URL updated' });
+    } catch (e) {
+        res.status(401).send({ message: e.message });
+    }
+});
+
+
+/**
  * @route PATCH /group/:id/edit
  * @desc Edit a group's details
  * @access Private (Owner or Moderator)
@@ -53,6 +77,27 @@ router.get('/group/:id', async (req, res) => {
         res.status(200).send(group);
     } catch (err) {
       res.status(500).json({ error: 'Server error' });
+    }
+});
+
+
+/**
+ * @route GET /group/:uniqueURL
+ * @desc Get a group by its uniqueURL
+ * @access Public
+ *
+ * @param {string} req.params.uniqueURL - The uniqueURL of the group to be retrieved
+ */
+router.get('/groups/:uniqueURL', async (req, res) => {
+    try {
+        const group = await Group.findOne({ uniqueURL: req.params.uniqueURL });
+        if (!group) {
+            return res.status(404).json({ error: 'Group not found' });
+        }
+
+        res.status(200).send(group);
+    } catch (err) {
+        res.status(500).json({ error: 'Server error' });
     }
 });
 

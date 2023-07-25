@@ -23,6 +23,11 @@ const mongoose = require('mongoose');
  * @property {boolean} deactivated - Indicates if the group is deactivated.
  */
 const groupSchema = new mongoose.Schema({
+    uniqueURL: {
+        type: String,
+        required: false,
+        unique: true
+    },
     owner: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
@@ -128,10 +133,28 @@ groupSchema.index({
     'categories': 'text',
 });
 
+
 // Add a 2dsphere index for the location.geo field
 groupSchema.index({ 'location.geo.coordinates': '2dsphere' });
 
+
+/**
+ * Middleware to generate uniqueURL for the user
+ */
+groupSchema.pre('save', function (next) {
+    if (!this.isModified('name')) {
+        return next();
+    }
+
+    // Generate the unique URL (slug)
+    this.uniqueURL = this.name.replace(/\s+/g, '-').toLowerCase() + '-' + Date.now();
+
+    next();
+});
+
+
 // Create the Group model using the group schema
 const Group = mongoose.model('Group', groupSchema);
+
 
 module.exports = Group;
