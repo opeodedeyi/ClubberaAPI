@@ -29,30 +29,40 @@ router.get('/search', async (req, res) => {
     const lat = parseFloat(req.query.lat);
     const distance = parseFloat(req.query.distance) || 10; // Distance in miles
 
-    // Build the MongoDB search query using $text search for name, location.address, description and categories
-    const query = {
-        $text: { $search: search }
-    };
-
-    // Add category filter to the query if provided
-    if (category) {
-        query.categories = category;
-    }
-
-    // Add location filter to the query if latitude and longitude are provided
-    if (lng && lat) {
-        const earthRadiusInMiles = 3963.2;
-        query['location.geo.coordinates'] = {
-            $geoWithin: {
-                $centerSphere: [[lng, lat], distance / earthRadiusInMiles],
-            },
-        };
-    }
-
+    // If search query is empty, retrieve all groups
+    let groups;
     try {
-        const groups = await Group.find(query)
-            .skip((page - 1) * limit)
-            .limit(limit);
+        if (search === '') {
+            groups = await Group.find({})
+                .skip((page - 1) * limit)
+                .limit(limit);
+        } else {
+            // Build the MongoDB search query using $text search for name, location.address, description, and categories
+            const query = {
+                $text: { $search: search }
+            };
+
+            // Add category filter to the query if provided
+            if (category) {
+                query.categories = category;
+            }
+
+            // Add location filter to the query if latitude and longitude are provided
+            if (lng && lat) {
+                const earthRadiusInMiles = 3963.2;
+                query['location.geo.coordinates'] = {
+                    $geoWithin: {
+                        $centerSphere: [[lng, lat], distance / earthRadiusInMiles],
+                    },
+                };
+            }
+
+            // Find the groups, including the search score, and sort by score
+            groups = await Group.find(query, { score: { $meta: 'textScore' } })
+                .sort({ score: { $meta: 'textScore' } })
+                .skip((page - 1) * limit)
+                .limit(limit);
+        }
 
         res.status(200).send(groups);
     } catch (e) {
