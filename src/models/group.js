@@ -46,9 +46,15 @@ const groupSchema = new mongoose.Schema({
         maxlength: 500,
         trim: true,
     },
-    bannerURL: {
-        type: String,
-        required: false,
+    banner: {
+        key: {
+            type: String,
+            required: false, // The unique identifier (key) for the photo in the AWS S3 bucket
+        },
+        location: {
+            type: String,
+            required: false,  // The full URL of the photo in the AWS S3 bucket
+        },
     },
     location: {
         place_id: {
