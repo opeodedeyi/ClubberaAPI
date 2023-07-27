@@ -19,7 +19,7 @@ const router = new express.Router();
  */
 router.post('/group', auth, isEmailConfirmed, async (req, res) => {
     try {
-        uploadedImageData = await uploadToS3(req.body.base64data, req.body.fileName)
+        const uploadedImageData = await uploadToS3(req.body.base64data, req.body.fileName)
 
         // // Create a new group with the provided data and set the owner to the authenticated user
         // const group = new Group({
