@@ -4,6 +4,8 @@ const isEmailConfirmed = require('../middleware/isEmailConfirmed');
 const Group = require('../models/group');
 const User = require('../models/user');
 
+const { uploadToS3 } = require('../services/s3Service');
+
 const router = new express.Router();
 
 
@@ -17,17 +19,20 @@ const router = new express.Router();
  */
 router.post('/group', auth, isEmailConfirmed, async (req, res) => {
     try {
-        // Create a new group with the provided data and set the owner to the authenticated user
-        const group = new Group({
-            ...req.body,
-            owner: req.user._id,
-        });
+        uploadedImageData = await uploadToS3(req.body.base64data, req.body.fileName)
 
-        // Save the group to the database
-        await group.save();
+        // // Create a new group with the provided data and set the owner to the authenticated user
+        // const group = new Group({
+        //     ...req.body,
+        //     owner: req.user._id,
+        // });
+
+        // // Save the group to the database
+        // await group.save();
 
         // Send a 201 Created response with the created group
-        res.status(201).send(group);
+        // res.status(201).send(group);
+        res.status(201).send(uploadedImageData);
     } catch (e) {
         // Send a 400 Bad Request response if an error occurs
         res.status(400).send(e);
