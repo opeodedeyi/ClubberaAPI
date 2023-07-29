@@ -23,7 +23,7 @@ router.get('/search', async (req, res) => {
     const search = req.query.search || '';
     const category = req.query.category || '';
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 12;
 
     const lng = parseFloat(req.query.lng);
     const lat = parseFloat(req.query.lat);

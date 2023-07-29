@@ -188,7 +188,10 @@ router.post('/google-auth', async (req, res) => {
             user = await userService.createUser(newUser);
         }
 
-        console.log(user);
+        if (user.isEmailConfirmed === false) {
+            user.isEmailConfirmed = true;
+            await user.save();
+        }
 
         const token = await authService.generateAuthToken(user);
         res.status(200).send({ user, token, message: 'User logged in with Google' });
