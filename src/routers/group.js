@@ -17,22 +17,26 @@ const router = new express.Router();
  * This route allows a verified user (authenticated and with a confirmed email address) 
  * to create a new social club. The authenticated user's ID is set as the owner of the club.
  */
-router.post('/group', auth, isEmailConfirmed, async (req, res) => {
+router.post('/group', auth, async (req, res) => {
     try {
         const uploadedImageData = await uploadToS3(req.body.base64data, req.body.fileName)
 
-        // // Create a new group with the provided data and set the owner to the authenticated user
-        // const group = new Group({
-        //     ...req.body,
-        //     owner: req.user._id,
-        // });
+        // Create a new group with the provided data and set the owner to the authenticated user
+        const group = new Group({
+            ...req.body,
+            owner: req.user._id,
+            banner: {
+                key: uploadedImageData.key,
+                location: uploadedImageData.location,
+            },
+        });
 
-        // // Save the group to the database
-        // await group.save();
+        // Save the group to the database
+        await group.save();
 
         // Send a 201 Created response with the created group
-        // res.status(201).send(group);
-        res.status(201).send(uploadedImageData);
+        res.status(201).send(group);
+        // res.status(201).send(uploadedImageData);
     } catch (e) {
         // Send a 400 Bad Request response if an error occurs
         res.status(400).send(e);

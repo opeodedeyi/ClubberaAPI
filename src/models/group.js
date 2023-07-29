@@ -38,7 +38,7 @@ const groupSchema = new mongoose.Schema({
         required: true,
         maxlength: 50,
         trim: true,
-        unique: true,
+        unique: false,
     },
     description: {
         type: String,

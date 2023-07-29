@@ -23,21 +23,27 @@ const uploadToS3 = async (base64data, filename) => {
     // Extract the mimeType from the base64 data
     const mimeType = base64data.split(',')[0].split(':')[1].split(';')[0];
 
-
     const params = {
-        Bucket: process.env.VITE_APP_AWS_BUCKET_NAME,
+        Bucket: process.env.AWS_BUCKET_NAME,
         Key: uniqueFilename,
         Body: buffer,
         ContentType: mimeType,
-        ACL: 'public-read'
+        ACL: 'public-read'  // Allow public read access
     };
 
     const command = new AWS.PutObjectCommand(params)
 
     try {
-        const data = await s3.send(command);
-        console.log(`Image uploaded successfully at ${data} location - ${data.Location} key - ${uniqueFilename}`);
-        return data;
+        await s3.send(command);
+
+        // Create the S3 object URL after a successful upload
+        const objectUrl = `https://${params.Bucket}.s3.${process.env.AWS_REGION}.amazonaws.com/${params.Key}`;
+
+        // Return URL and Key
+        return {
+            location: objectUrl,
+            key: uniqueFilename
+        };
     } catch (error) {
         console.log(`Failed to upload image to S3: ${error}`);
     }
