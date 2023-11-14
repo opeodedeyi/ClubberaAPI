@@ -68,7 +68,7 @@ Most api usage were done on the frontend.
 
 ## Known bugs
 
-Failing to create a 
+when trying to create a community it fails. it only works when i use postman. if anyone can help review what i did and make improvements, please 
 
 ## Contributing
 
