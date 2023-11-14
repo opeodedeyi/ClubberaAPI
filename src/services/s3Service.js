@@ -49,6 +49,28 @@ const uploadToS3 = async (base64data, filename) => {
     }
 };
 
+
+const deleteFromS3 = async (key) => {
+    // Configure the parameters
+    const params = {
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Key: key
+    };
+
+    // Create the command
+    const command = new AWS.DeleteObjectCommand(params);
+
+    try {
+        // Execute the command
+        await s3.send(command);
+        console.log(`Successfully deleted ${key} from S3`);
+    } catch (error) {
+        console.log(`Failed to delete ${key} from S3: ${error}`);
+    }
+};
+
+
 module.exports = {
-    uploadToS3
+    uploadToS3,
+    deleteFromS3
 };
