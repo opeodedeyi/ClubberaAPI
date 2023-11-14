@@ -59,10 +59,10 @@ Most api usage were done on the frontend.
 
 ## Tasks To Be Done
 
-- [ ] Renaming the fields in the group schema to closely relate to what it will be named on the frontend and make migrations also
-- [ ] when users try to sign upor login, if an error occours along the way, i want the message telling them exactly what happenned to come from the API
-- [ ] Task 3
-- [ ] Task 4
+- [ ] Renaming the fields in the group schema to closely relate to what it will be named on the frontend and make migrations also.
+- [ ] When users try to sign up or login, success or error message tellig them exactly what happened to show up
+- [ ] Feature to add an event to a group, and users should be able to create an event if they are creators of that community, delete, and update.
+- [ ] Regarding the event, a seperate route to get all upcoming events, past events that have ended 
 
 ## Known bugs
 
