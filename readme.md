@@ -62,7 +62,9 @@ Most api usage were done on the frontend.
 - [ ] Renaming the fields in the group schema to closely relate to what it will be named on the frontend and make migrations also.
 - [ ] When users try to sign up or login, success or error message tellig them exactly what happened to show up
 - [ ] Feature to add an event to a group, and users should be able to create an event if they are creators of that community, delete, and update.
-- [ ] Regarding the event, a seperate route to get all upcoming events, past events that have ended 
+- [ ] Regarding the event, a seperate route to get all upcoming events, past events that have ended.
+- [ ] Also, when gettig all upcoming events it should be sorted by showing the events with the closest dates first and the ones starting later show later.
+
 
 ## Known bugs
 
