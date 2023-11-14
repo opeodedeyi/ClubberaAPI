@@ -54,24 +54,25 @@ ADMIN_SECRET_KEY=your_value
 
 ## APIs Used
 
-- Google Auth API
 Most api usage were done on the frontend.
+- Google Auth API
 
 ## Tasks To Be Done
 
-- [ ] Task 1
-- [ ] Task 2
+- [ ] Renaming the fields in the group schema to closely relate to what it will be named on the frontend and make migrations also
+- [ ] when users try to sign upor login, if an error occours along the way, i want the message telling them exactly what happenned to come from the API
 - [ ] Task 3
 - [ ] Task 4
 
+## Known bugs
+
+Failing to create a 
+
 ## Contributing
 
-Details on how to contribute to this project.
+Email me, lets talk about contribution
 
-## License
-
-Information about the license.
 
 ## Contact
 
-Your contact information.
+opeyemiodedeyi@gmail.com
