@@ -1,81 +1,16 @@
-// Import required modules
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
-
-// Import module
 const User = require('../models/user');
 
-// Import services
 const userService = require('../services/userService');
 const authService = require('../services/authService');
 const emailService = require('../services/emailService');
 const { uploadToS3 } = require('../services/s3Service');
 const { OAuth2Client } = require('google-auth-library');
-
-// Import Middleware
 const { auth } = require('../middleware/auth');
-
-// Create a router
 const router = new express.Router();
-
-
-/**
- * Get the welcome message for the API (Tested)
- * @route GET /
- * @returns {Object} 201 - A success status and a welcome message
- * @returns {Object} 400 - A bad request status and an error message
- */
-router.get('', async (req, res) => {
-    try {
-        res.status(201).send({"message": "Welcome to Clubbera API"})
-    } catch (e) {
-        res.status(400).send({ "message": "Something went wrong entering Clubbera API" })
-    }
-})
-
-
-/**
- * @api {get} /find-users Search for a user by email or fullname (Tested)
- * @apiName SearchUser
- * @apiGroup User
- * @apiVersion 1.0.0
- *
- * @apiParam {String} query Search query for email or fullname.
- * @apiParam {Number} [page=1] Page number for paginated results.
- * @apiParam {Number} [limit=10] Number of results per page.
- *
- * @apiSuccess {Object[]} users List of users matching the search query.
- * @apiSuccess {Number} totalPages Total number of pages available.
- *
- * @apiError (Error 500) {String} error 'Server error'.
- */
-router.get('/find-users', async (req, res) => {
-    const query = req.query.query || '';
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-
-    const regex = new RegExp(query, 'i');
-
-    try {
-        const users = await User.find({
-            $or: [{ email: regex }, { fullname: regex }],
-        })
-            .skip((page - 1) * limit)
-            .limit(limit);
-
-        const count = await User.countDocuments({
-            $or: [{ email: regex }, { fullname: regex }],
-        });
-
-        const totalPages = Math.ceil(count / limit);
-
-        res.status(200).send({ users, totalPages });
-    } catch (e) {
-        res.status(500).send({ error: 'Server error' });
-    }
-});
 
 
 /**
@@ -102,6 +37,30 @@ router.post('/signup', async (req, res) => {
 
 
 /**
+ * Log in a user (Tested)
+ * @route POST /login
+ * @param {Object} req.body - The request body containing the user's email and password
+ * @returns {Object} 200 - A success status, the user object, the token, and a success message
+ * @returns {Object} 500 - An internal server error status and an error message
+ */
+router.post('/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const user = await userService.findByCredentials(email, password);
+        
+        if (!user) {
+            return res.status(401).send({ message: 'Invalid email or password' });
+        }
+        
+        const token = await authService.generateAuthToken(user);
+        res.status(200).send({ user, token, message: 'User logged in successfully' });
+    } catch (e) {
+        res.status(500).send({ message: 'Something went wrong' });
+    }
+})
+
+
+/**
  * Edit/Update a User details
  * @route PATCH /users/me/edit-profile
  * @param {Object} req.body - The user data
@@ -110,7 +69,7 @@ router.post('/signup', async (req, res) => {
  */
 router.patch('/users/me/edit-profile', auth, async (req, res) => {
     const updates = Object.keys(req.body);
-    const allowedUpdates = ['fullname', 'bio', 'gender', 'interests', 'profilePhoto'];
+    const allowedUpdates = ['fullName', 'bio', 'gender', 'profilePhoto', 'location', 'birthday'];
     const isValidOperation = updates.every((update) => allowedUpdates.includes(update));
     
     if (!isValidOperation) {
@@ -130,27 +89,6 @@ router.patch('/users/me/edit-profile', auth, async (req, res) => {
         res.send(user);
     } catch (e) {
         res.status(400).send(e);
-    }
-});
-
-
-/**
- * Update existing users URL
- * @route POST /update-all-url
- * @returns {Object} 201 - A success status and a success message
- * @returns {Object} 401 - An unauthorized status and an error message
- */
-router.post('/update-all-url', async (req, res) => {
-    // Use the userService to create a new user
-    try {
-        const users = await User.find({ uniqueURL: { $exists: false } });
-        users.forEach(async (user) => {
-            user.uniqueURL = user.fullname.replace(/\s+/g, '-').toLowerCase() + '-' + Date.now();
-            await user.save();
-        });
-        res.status(201).send({ users, message: 'User URL updated' });
-    } catch (e) {
-        res.status(401).send({ message: e.message });
     }
 });
 
@@ -176,7 +114,7 @@ router.post('/google-auth', async (req, res) => {
         if (!user) {
             const newUser = {
                 email,
-                fullname: name,
+                fullName: name,
                 password: bcrypt.hashSync(generatePassword(16), 8),
                 profilePhoto: {
                     key: '',
@@ -321,30 +259,6 @@ router.post('/reset-password/:resetToken', async (req, res) => {
 
 
 /**
- * Log in a user (Tested)
- * @route POST /login
- * @param {Object} req.body - The request body containing the user's email and password
- * @returns {Object} 200 - A success status, the user object, the token, and a success message
- * @returns {Object} 500 - An internal server error status and an error message
- */
-router.post('/login', async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        const user = await userService.findByCredentials(email, password);
-        
-        if (!user) {
-            return res.status(401).send({ message: 'Invalid email or password' });
-        }
-        
-        const token = await authService.generateAuthToken(user);
-        res.status(200).send({ user, token, message: 'User logged in successfully' });
-    } catch (e) {
-        res.status(500).send({ message: 'Something went wrong' });
-    }
-})
-
-
-/**
  * Log out a user by removing the current authentication token (Tested)
  * @route POST /logout
  * @middleware auth - The authentication middleware
@@ -360,24 +274,6 @@ router.post('/logout', auth, async (req, res) => {
         res.status(200).send({ message: 'User logged out' });
     } catch (e) {
         res.status(500).send({ message: 'Something went wrong' })
-    }
-})
-
-
-/**
- * Log out a user from all devices by removing all authentication tokens (Tested)
- * @route POST /logout-all
- * @middleware auth - The authentication middleware
- * @returns {Object} 200 - A success status and a success message
- * @returns {Object} 500 - An internal server error status and an error message
- */
-router.post('/logout-all', auth, async (req, res) => {
-    try {
-        req.user.tokens = []
-        await req.user.save()
-        res.status(200).send({ message: 'User logged out from all devices' });
-    } catch (e) {
-        res.status(500).send({ message: 'Something went wrong' });
     }
 })
 
@@ -409,11 +305,11 @@ router.get('/me', auth, async (req, res) => {
  */
 router.patch('/me/change-password', auth, async (req, res) => {
     try {
-        const currentPassword = req.body.currentPassword;
+        const oldPassword = req.body.oldPassword;
         const newPassword = req.body.newPassword;
         
         // Check if the current password is correct
-        const isMatch = await userService.comparePasswords(req.user, currentPassword);
+        const isMatch = await userService.comparePasswords(req.user, oldPassword);
 
         if (!isMatch) {
             return res.status(400).send({ message: 'Current password is incorrect' });

@@ -11,23 +11,22 @@ require('dotenv').config()
  * User schema representing a user.
  *
  * @typedef {Object} User
- * @property {string} fullname - The full name of the user.
+ * @property {string} fullName - The full name of the user.
  * @property {string} email - The user's email address.
+ * @property {string} uniqueURL - The users unique URL.
+ * @property {string} bio - The user's bio.
  * @property {string} password - The user's password.
  * @property {string} gender - The user's gender.
- * @property {Array} interests - An array of category IDs representing the user's interests.
- * @property {Array} moderatorInvitations - An array of group IDs representing the moderator request to the user.
+ * @property {Object} location - An object containing the clit, longitude and latitude of the user.
  * @property {Object} profilePhoto - An object containing the key and location of the user's profile photo.
  * @property {boolean} isEmailConfirmed - Indicates if the user's email is confirmed.
- * @property {boolean} isVerified - Indicates if the user is verified.
- * @property {boolean} isAdmin - Indicates if the user is an admin.
  * @property {boolean} isActive - Indicates if the user's account is active.
  * @property {string} emailConfirmToken - The email confirmation token for the user.
  * @property {string} passwordResetToken - The password reset token for the user.
  * @property {Array} tokens - An array of authentication tokens for the user.
  */
 const userSchema = new mongoose.Schema({
-    fullname: {
+    fullName: {
         type: String, 
         required: true,
         trim: true,
@@ -73,24 +72,26 @@ const userSchema = new mongoose.Schema({
         required: false,
         set: (value) => value.toLowerCase(), // Convert the input to lowercase
     },
-    interests: {
-        type: [String],
-        default: [],
-        required: false
-    },
-    moderatorInvitations: [
-        {
-            group: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'Group',
-            },
-            sentAt: {
-                type: Date,
-                default: Date.now,
-            },
+    location: {
+        city: {
+            type: String,
+            required: false, // The unique identifier (key) for the photo in the AWS S3 bucket
         },
-    ],
+        lat: {
+            type: String,
+            required: false,  // The full URL of the photo in the AWS S3 bucket
+        },
+        lng: {
+            type: String,
+            required: false,  // The full URL of the photo in the AWS S3 bucket
+        },
+    },
     profilePhoto: {
+        provider: {
+            type: String,
+            enum: ['aws', 'google'],
+            required: false,
+        },
         key: {
             type: String,
             required: false, // The unique identifier (key) for the photo in the AWS S3 bucket
@@ -100,17 +101,11 @@ const userSchema = new mongoose.Schema({
             required: false,  // The full URL of the photo in the AWS S3 bucket
         },
     },
+    birthday: {
+        type: Date,
+        required: false
+    },
     isEmailConfirmed: {
-        type: Boolean,
-        required: false,
-        default: false
-    },
-    isVerified: {
-        type: Boolean,
-        required: false,
-        default: false
-    },
-    isAdmin: {
         type: Boolean,
         required: false,
         default: false

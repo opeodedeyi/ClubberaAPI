@@ -4,13 +4,16 @@
 
 A brief description of what this project does and who it's for.
 
+
 ## Installation
 
 Provide steps on how to install and setup your project.
 
+
 ## Usage
 
 Instructions on how to use your project.
+
 
 ## Technologies Used
 
@@ -21,9 +24,11 @@ Instructions on how to use your project.
 - Google Auth Library
 - AWS S3
 
+
 ## Cloud Services
 
 - AWS S3
+
 
 ## Environment Variables
 
@@ -52,10 +57,12 @@ EMAIL_CONFIRM_SECRET_KEY=your_value
 ADMIN_SECRET_KEY=your_value
 ```
 
+
 ## APIs Used
 
 Most api usage were done on the frontend.
 - Google Auth API
+
 
 ## Tasks To Be Done
 
@@ -70,6 +77,7 @@ Most api usage were done on the frontend.
 
 when trying to create a community it fails. it only works when i use postman. if anyone can help review what i did and make improvements, please 
 
+
 ## Contributing
 
 Email me, lets talk about contribution
@@ -78,3 +86,20 @@ Email me, lets talk about contribution
 ## Contact
 
 opeyemiodedeyi@gmail.com
+
+
+## Github note
+
+- [git add .](#gitadd)
+- [git commit -m "any comment"](#Initialcommit)
+- [git push -u origin master](#gitpush)
+
+
+## deploy to heroku
+
+- [git push heroku main](#herokupush)
+
+
+## Installation
+
+[npm run dev]
