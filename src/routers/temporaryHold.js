@@ -65,24 +65,6 @@
 
 
 /**
- * Log out a user from all devices by removing all authentication tokens (Tested)
- * @route POST /logout-all
- * @middleware auth - The authentication middleware
- * @returns {Object} 200 - A success status and a success message
- * @returns {Object} 500 - An internal server error status and an error message
- */
-// router.post('/logout-all', auth, async (req, res) => {
-//     try {
-//         req.user.tokens = []
-//         await req.user.save()
-//         res.status(200).send({ message: 'User logged out from all devices' });
-//     } catch (e) {
-//         res.status(500).send({ message: 'Something went wrong' });
-//     }
-// })
-
-
-/**
  * Set a display picture for the user
  * @route POST /me/profile-photo
  * @middleware auth - The authentication middleware

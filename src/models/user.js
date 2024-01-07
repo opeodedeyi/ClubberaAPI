@@ -55,8 +55,7 @@ const userSchema = new mongoose.Schema({
         type: String, 
         required: false,
         trim: true,
-        lowercase: false,
-        default: null,
+        lowercase: false
     },
     password: {
         type: String,
@@ -78,18 +77,18 @@ const userSchema = new mongoose.Schema({
             required: false, // The unique identifier (key) for the photo in the AWS S3 bucket
         },
         lat: {
-            type: String,
+            type: Number,
             required: false,  // The full URL of the photo in the AWS S3 bucket
         },
         lng: {
-            type: String,
+            type: Number,
             required: false,  // The full URL of the photo in the AWS S3 bucket
         },
     },
     profilePhoto: {
         provider: {
             type: String,
-            enum: ['aws', 'google'],
+            enum: ['aws', 'google', 'local'],
             required: false,
         },
         key: {
@@ -135,7 +134,7 @@ const userSchema = new mongoose.Schema({
 
 
 // Create a text index for the fullname field
-userSchema.index({ fullname: 'text' });
+userSchema.index({ fullName: 'text' });
 
 
 /**
@@ -147,6 +146,8 @@ userSchema.methods.toJSON = function () {
 
     delete userObject.password
     delete userObject.tokens
+    delete userObject.emailConfirmToken
+    delete userObject.passwordResetToken
 
     return userObject
 }
@@ -156,12 +157,12 @@ userSchema.methods.toJSON = function () {
  * Middleware to generate uniqueURL for the user
  */
 userSchema.pre('save', function (next) {
-    if (!this.isModified('fullname')) {
+    if (!this.isModified('fullName')) {
         return next();
     }
 
     // Generate the unique URL (slug)
-    this.uniqueURL = this.fullname.replace(/\s+/g, '-').toLowerCase() + '-' + Date.now();
+    this.uniqueURL = this.fullName.replace(/\s+/g, '-').toLowerCase() + '-' + Date.now();
 
     next();
 });

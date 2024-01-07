@@ -62,12 +62,12 @@ router.post('/login', async (req, res) => {
 
 /**
  * Edit/Update a User details
- * @route PATCH /users/me/edit-profile
+ * @route PATCH /edit-users-profile
  * @param {Object} req.body - The user data
  * @returns {Object} 201 - A success status, the new user object, the token, and a success message
  * @returns {Object} 400 - An unauthorized status and an error message
  */
-router.patch('/users/me/edit-profile', auth, async (req, res) => {
+router.patch('/edit-users-profile', auth, async (req, res) => {
     const updates = Object.keys(req.body);
     const allowedUpdates = ['fullName', 'bio', 'gender', 'profilePhoto', 'location', 'birthday'];
     const isValidOperation = updates.every((update) => allowedUpdates.includes(update));
@@ -274,6 +274,24 @@ router.post('/logout', auth, async (req, res) => {
         res.status(200).send({ message: 'User logged out' });
     } catch (e) {
         res.status(500).send({ message: 'Something went wrong' })
+    }
+})
+
+
+/**
+ * Log out a user from all devices by removing all authentication tokens (Tested)
+ * @route POST /logout-all
+ * @middleware auth - The authentication middleware
+ * @returns {Object} 200 - A success status and a success message
+ * @returns {Object} 500 - An internal server error status and an error message
+ */
+router.post('/logout-all', auth, async (req, res) => {
+    try {
+        req.user.tokens = []
+        await req.user.save()
+        res.status(200).send({ message: 'User logged out from all devices' });
+    } catch (e) {
+        res.status(500).send({ message: 'Something went wrong' });
     }
 })
 
