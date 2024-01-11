@@ -55,6 +55,7 @@ router.post('/signup', async (req, res) => {
         emailService.sendEmail(emailOptions.to, emailOptions.subject, emailOptions.text);
         res.status(201).send({ newUser, token, message: 'User created' });
     } catch (e) {
+        console.error(e);
         res.status(401).send({ message: e.message });
     }
 });
