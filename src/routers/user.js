@@ -13,6 +13,30 @@ const { auth } = require('../middleware/auth');
 const router = new express.Router();
 
 
+
+/**
+ * Check if a user exists in the database
+ * @route POST /presignup
+ * @param {Object} req.body - The user data to check
+ * @returns {Object} 200 - A success status and a message indicating the user does not exist
+ * @returns {Object} 409 - A conflict status and an error message indicating the user already exists
+ */
+router.post('/presignup', async (req, res) => {
+    try {
+        const { email } = req.body;
+        const user = await userService.findByEmail(email);
+        
+        if (user) {
+            return res.status(409).send({ message: 'User already exists' });
+        }
+        
+        res.status(200).send({ message: 'User does not exist' });
+    } catch (e) {
+        res.status(500).send({ message: 'Something went wrong' });
+    }
+});
+
+
 /**
  * Sign up a new user
  * @route POST /signup
