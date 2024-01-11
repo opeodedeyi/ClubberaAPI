@@ -66,6 +66,7 @@ Most api usage were done on the frontend.
 
 ## Tasks To Be Done
 
+- [ ] login with google and setting profile photo using AWS.
 - [ ] Renaming the fields in the group schema to closely relate to what it will be named on the frontend and make migrations also.
 - [ ] When users try to sign up or login, success or error message tellig them exactly what happened to show up
 - [ ] Feature to add an event to a group, and users should be able to create an event if they are creators of that community, delete, and update.

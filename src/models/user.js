@@ -199,5 +199,4 @@ userSchema.set('toJSON', { transform: userTransformation });
 
 // Create the User model using the user schema
 const User = mongoose.model('User', userSchema);
-
 module.exports = User;

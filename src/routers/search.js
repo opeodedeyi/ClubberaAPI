@@ -21,13 +21,8 @@ const router = new express.Router();
  */
 router.get('/search', async (req, res) => {
     const search = req.query.search || '';
-    const category = req.query.category || '';
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 12;
-
-    const lng = parseFloat(req.query.lng);
-    const lat = parseFloat(req.query.lat);
-    const distance = parseFloat(req.query.distance) || 10; // Distance in miles
 
     // If search query is empty, retrieve all groups
     let groups;
@@ -41,21 +36,6 @@ router.get('/search', async (req, res) => {
             const query = {
                 $text: { $search: search }
             };
-
-            // Add category filter to the query if provided
-            if (category) {
-                query.categories = category;
-            }
-
-            // Add location filter to the query if latitude and longitude are provided
-            if (lng && lat) {
-                const earthRadiusInMiles = 3963.2;
-                query['location.geo.coordinates'] = {
-                    $geoWithin: {
-                        $centerSphere: [[lng, lat], distance / earthRadiusInMiles],
-                    },
-                };
-            }
 
             // Find the groups, including the search score, and sort by score
             groups = await Group.find(query, { score: { $meta: 'textScore' } })

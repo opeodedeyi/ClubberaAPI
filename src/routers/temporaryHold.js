@@ -43,57 +43,107 @@
 // });
 
 
+
+// Group temporary hold
+
 /**
- * Update existing users URL
- * @route POST /update-all-url
- * @returns {Object} 201 - A success status and a success message
- * @returns {Object} 401 - An unauthorized status and an error message
+ * @route POST /group/:id/ban-user/:userId
+ * @desc Ban a user from a group if the requester is the owner or a moderator. The owner and moderators cannot be banned.
+ * @param {string} id - The ID of the group.
+ * @param {string} userId - The ID of the user to be banned.
+ * @access Private (Requires authentication and email confirmation)
  */
-// router.post('/update-all-url', async (req, res) => {
-//     // Use the userService to create a new user
+// router.post('/group/:id/ban-user/:userId', auth, isEmailConfirmed, async (req, res) => {
 //     try {
-//         const users = await User.find({ uniqueURL: { $exists: false } });
-//         users.forEach(async (user) => {
-//             user.uniqueURL = user.fullname.replace(/\s+/g, '-').toLowerCase() + '-' + Date.now();
-//             await user.save();
-//         });
-//         res.status(201).send({ users, message: 'User URL updated' });
+//         const groupId = req.params.id;
+//         const group = await Group.findById(groupId);
+
+//         if (!group) {
+//             return res.status(404).send({ error: 'Group not found' });
+//         }
+
+//         const currentUserId = req.user._id;
+//         const isOwner = group.owner.equals(currentUserId);
+//         const isModerator = group.moderators.some((moderatorId) => moderatorId.equals(currentUserId));
+
+//         if (!isOwner && !isModerator) {
+//             return res.status(403).send({ error: 'You do not have permission to ban users' });
+//         }
+
+//         const userIdToBan = req.params.userId;
+
+//         if (group.owner.equals(userIdToBan) || group.moderators.some((moderatorId) => moderatorId.equals(userIdToBan))) {
+//             return res.status(400).send({ error: 'You cannot ban the owner or a moderator of this group' });
+//         }
+
+//         const isBanned = group.bannedUsers.some((bannedUserId) => bannedUserId.equals(userIdToBan));
+
+//         if (isBanned) {
+//             return res.status(400).send({ error: 'User is already banned from this group' });
+//         }
+
+//         group.bannedUsers.push(userIdToBan);
+//         group.members = group.members.filter((memberId) => !memberId.equals(userIdToBan));
+//         group.requests = group.requests.filter((requestId) => !requestId.equals(userIdToBan));
+
+//         await group.save();
+
+//         res.status(200).send(group);
 //     } catch (e) {
-//         res.status(401).send({ message: e.message });
+//         res.status(500).send({ error: 'Server error' });
 //     }
 // });
 
 
 /**
- * Set a display picture for the user
- * @route POST /me/profile-photo
- * @middleware auth - The authentication middleware
- * @param {Object} req.body - The request body containing the image data
- * @returns {Object} 200 - A success status, the updated user object, and a success message
- * @returns {Object} 400 - A bad request status and an error message
- * @returns {Object} 500 - An internal server error status and an error message
+ * @api {post} /group/:id/unban-user/:userId Unban a user from a group
+ * @apiName UnbanUser
+ * @apiGroup Group
+ * @apiPermission owner, moderator
+ *
+ * @apiHeader {String} Authorization Bearer token containing the user's access token.
+ *
+ * @apiParam (URL Params) {String} id The ID of the group.
+ * @apiParam (URL Params) {String} userId The ID of the user to unban.
+ *
+ * @apiSuccess (200) {Object} group The updated group with the user unbanned.
+ *
+ * @apiError (400) {Object} error An error message if the user is not banned from the group.
+ * @apiError (403) {Object} error An error message if the authenticated user is not the owner or a moderator.
+ * @apiError (404) {Object} error An error message if the group is not found.
+ * @apiError (500) {Object} error An error message if a server error occurs.
  */
-// router.post('/me/profile-photo', auth, express.json({ limit: '10mb' }), async (req, res) => {
+// router.post('/group/:id/unban-user/:userId', auth, isEmailConfirmed, async (req, res) => {
 //     try {
-//         const user = req.user;
-//         const imageData = req.body.imageData;
-        
-//         if (!imageData) {
-//             return res.status(400).send({ message: 'No image data provided' });
+//         const groupId = req.params.id;
+//         const group = await Group.findById(groupId);
+
+//         if (!group) {
+//             return res.status(404).send({ error: 'Group not found' });
 //         }
 
-//         const buffer = Buffer.from(imageData, 'base64');
-//         const key = `profile-photos/${user._id}-${Date.now()}.jpg`;
-        
-//         try {
-//             const data = await uploadToS3(buffer, key, 'image/jpeg');
-//             const updatedUser = await userService.setProfilePhoto(user, data);
-//             res.status(200).send({ updatedUser, message: 'Profile photo updated' });
-//         } catch (err) {
-//             res.status(500).send({ message: 'Something went wrong' });
+//         const currentUserId = req.user._id;
+//         const isOwner = group.owner.equals(currentUserId);
+//         const isModerator = group.moderators.some((moderatorId) => moderatorId.equals(currentUserId));
+
+//         if (!isOwner && !isModerator) {
+//             return res.status(403).send({ error: 'You do not have permission to unban users' });
 //         }
 
-//     } catch(e) {
-//         res.status(500).send({ message: 'Something went wrong' });
+//         const userIdToUnban = req.params.userId;
+//         const isBanned = group.bannedUsers.some((bannedUserId) => bannedUserId.equals(userIdToUnban));
+
+//         if (!isBanned) {
+//             return res.status(400).send({ error: 'User is not banned from this group' });
+//         }
+
+//         group.bannedUsers = group.bannedUsers.filter((bannedUserId) => !bannedUserId.equals(userIdToUnban));
+
+//         await group.save();
+
+//         res.status(200).send(group);
+//     } catch (e) {
+//         res.status(500).send({ error: 'Server error' });
 //     }
-// })
+// });
+
